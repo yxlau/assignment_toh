@@ -30,22 +30,39 @@ class TowerOfHanoi
       puts "move validated"
 
       # make move
+      make_move(move, towers)
 
       #render towers again
+      render(towers)
+
+      print towers
 
       # check if user has won
 
       # if has won, congratulate user and change game_over state
 
       # otherwise, reset valid_move
+      valid_move = false
 
 
       # prevent infinite loop
-      game_over = true
 
     end
   end
 
+
+  def make_move(move, towers)
+    current_tower = towers[move[0].to_i - 1]
+    new_tower = towers[move[-1].to_i - 1]
+    # get the top disc
+    disc = current_tower.find { |disc| disc != ' '}
+
+    new_tower[-new_tower.reverse.index(' ') - 1] = disc
+
+    # make its former place an empty slot
+    current_tower[current_tower.index(disc)] = ' '
+
+  end
 
 
   def render(towers)
