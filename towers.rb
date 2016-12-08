@@ -108,6 +108,9 @@ class TowerOfHanoi
         return false
       end
 
+    else
+      puts "You might have got your tower numbers or the format wrong.\n Enter where you'd like to move from and to in the format '1,3'."
+      return false
     end
 
     # validate move
