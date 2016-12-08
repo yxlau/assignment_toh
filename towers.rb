@@ -4,12 +4,14 @@ class TowerOfHanoi
   end
 
   def play
-    board = [ [ 'o', 'oo', 'ooo'], ['', '', ''], ['', '', ''] ]
+    towers = [ [ 'o', 'oo', 'ooo'], [' ', ' ', ' '], [' ', ' ', ' '] ]
     game_over = false
     valid_move = false
     move = ''
 
     welcome_message
+
+    render(towers)
 
     until game_over
 
@@ -21,7 +23,7 @@ class TowerOfHanoi
         exit if move == 'q'
 
         # validate move
-        valid_move = validate_move(move, board)
+        valid_move = validate_move(move, towers)
 
       end
 
@@ -29,7 +31,7 @@ class TowerOfHanoi
 
       # make move
 
-      #render board again
+      #render towers again
 
       # check if user has won
 
@@ -44,24 +46,38 @@ class TowerOfHanoi
     end
   end
 
-  def render(board)
-    # print towers row by row (instead of tower by tower)
+
+
+  def render(towers)
+    rungs = towers[0].size
+    towers.each_with_index do |tower, t|
+      (0...rungs).each do |r|
+        print towers[r][t].ljust(5)
+      end
+      puts "\n"
+    end
+    (1..@towers).to_a.each { |n| print n.to_s.ljust(5) }
+    puts "\n"
   end
 
-  def validate_move(move, board)
+  def validate_move(move, towers)
+    if move.length == 3
+      # convert to int and a
+      moves = move.split(',').map{ |tower| tower.to_i}
 
-    # convert to int and a
-    towers = move.split(',').map{ |tower| tower.to_i}
+      # make sure all towers exist
+      if moves.any? {|tower| tower < 1 || tower > @towers}
+        puts "Tower not found. Please move disc between our available towers: #{(1..@towers).to_a}"
+        return false
+      end
 
-    # make sure all towers exist
-    if towers.any? {|tower| tower < 1 || tower > @towers}
-      puts "Tower not found. Please move disc between our available towers: #{(1..@towers).to_a}"
-      return false
-    end
-
-    # make sure tower we're transferring from has disc
-    if board[towers[0]-1].all? { |tower| tower == ''}
-      puts "We couldn't find any discs to transfer. Try transfering discs from another tower"
+      # make sure tower we're transferring from has disc
+      if towers[moves[0]-1].all? { |tower| tower == ' '}
+        puts "We couldn't find any discs to transfer. Try transfering discs from another tower"
+        return false
+      end
+    else
+      puts "You might have got your tower numbers or the format wrong.\n Enter where you'd like to move from and to in the format '1,3'."
       return false
     end
 
