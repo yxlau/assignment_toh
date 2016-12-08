@@ -20,9 +20,12 @@ class TowerOfHanoi
         # let user exit immediately if they've entered 'q'
         exit if move == 'q'
 
-        valid_move = validate_move(move)
+        # validate move
+        valid_move = validate_move(move, board)
 
       end
+
+      puts "move validated"
 
       # make move
 
@@ -35,17 +38,36 @@ class TowerOfHanoi
       # otherwise, reset valid_move
 
 
-    end
-  end
+      # prevent infinite loop
+      game_over = true
 
-  def validate_move(move)
-    # make sure correct format
-    # make sure towers exist
-    # make sure tower has disc
+    end
   end
 
   def render(board)
     # print towers row by row (instead of tower by tower)
+  end
+
+  def validate_move(move, board)
+
+    # convert to int and a
+    towers = move.split(',').map{ |tower| tower.to_i}
+
+    # make sure all towers exist
+    if towers.any? {|tower| tower < 1 || tower > @towers}
+      puts "Tower not found. Please move disc between our available towers: #{(1..@towers).to_a}"
+      return false
+    end
+
+    # make sure tower we're transferring from has disc
+    if board[towers[0]-1].all? { |tower| tower == ''}
+      puts "We couldn't find any discs to transfer. Try transfering discs from another tower"
+      return false
+    end
+
+    # validate move
+    return true
+
   end
 
   def welcome_message
