@@ -1,12 +1,12 @@
 class TowerOfHanoi
-  def initialize(towers)
-    @towers = towers
+  def initialize(discs=3)
+    @discs = discs
   end
 
   def play
-    towers = [['o', 'oo', 'ooo'], [' ', ' ', ' '], [' ', ' ', ' ']]
-    game_over = false
+    towers = [build_first_tower(@discs), [],[]]
     valid_move = false
+    game_over = false
     move = ''
 
     welcome_message
@@ -16,8 +16,9 @@ class TowerOfHanoi
     until game_over
 
       until valid_move
-        puts 'Enter move > '
+        puts "\nEnter move > "
         move = gets.strip
+        puts "\n"
 
         # let user exit immediately if they've entered 'q'
         exit if move == 'q'
@@ -45,77 +46,93 @@ class TowerOfHanoi
     end
   end
 
+  def build_first_tower(discs)
+    first = []
+    (1..discs).each do |n|
+      first.unshift(n)
+    end
+    first
+  end
+
   def won?(towers)
     towers.each_with_index do |tower, i|
-      return true if tower.none? { |slot| slot == ' '} && i != 0
+      return true if i != 0 && tower == (1..@discs).to_a.reverse
     end
-    return false
+    false
   end
 
   def make_move(move, towers)
     current_tower = towers[move[0].to_i - 1]
     new_tower = towers[move[-1].to_i - 1]
 
-    # get the top disc
-    disc = current_tower.find { |disc| disc != ' '}
+    # get the top disc, which will always be the smallest disc in the tower
+    disc = current_tower.min
 
-    # place disc in bottom-most slot of new tower if all empty
-    new_tower[-new_tower.reverse.index(' ') - 1] = disc
+    # place disc in bottom-most slot of new tower
+    new_tower << disc
 
     # make its former place an empty slot
-    current_tower[current_tower.index(disc)] = ' '
+    current_tower.delete(disc)
 
   end
 
 
   def render(towers)
-    (0...@towers).each do |tower|
-      (0...@towers).each do |row|
-        print towers[row][tower].ljust(5)
+    space = @discs + 2
+    (0..@discs).reverse_each do |row|
+      (0...@discs).each do |tower|
+        print towers[tower][row].nil? ? ' '.ljust(space) : ("o" * towers[tower][row]).ljust(space)
       end
       puts "\n"
     end
-    (1..@towers).each { |n| print n.to_s.ljust(5)}
+    (1..@discs).each { |n| print n.to_s.ljust(space)}
     puts "\n"
   end
 
   def validate_move(move, towers)
-    unless move.length == 3
-      puts "You might have got your tower numbers or the format wrong.\n Enter where you'd like to move from and to in the format '1,3'."
-      return false
-    end
-    # convert to int and a
-    moves = [move[0].to_i-1, move[-1].to_i-1]
+    return false unless right_format?(move)
+
+    # store tower indices
+    from = move[0].to_i - 1
+    to = move[-1].to_i - 1
 
     # make sure all towers exist
-    if moves.any? {|tower_index| tower_index < 0 || tower_index >= @towers}
-      puts "Tower not found. Please move disc between our available towers: #{(1..@towers).to_a}"
-      return false
-    end
+    return false unless towers_exist?(from, to)
 
-    # make sure tower we're transferring from has disc
-    if towers[moves[0]].all? { |tower| tower == ' '}
-      puts "We couldn't find any discs to transfer. Try transfering discs from another tower"
-      return false
-    end
+    # make sure 'from' tower has disc
+    return false if tower_empty?(towers[from])
 
     # if new tower has a disc, make sure it's not smaller than the disc we're trying to move
-    if towers[moves[1]].any? { |slot| slot != ' '}
-      disc = towers[moves[0]].find { |disc| disc != ' '}
-      if towers[moves[1]].any? { |item| item != ' ' && disc.size > item.size }
-        puts "No disk may be placed on top of a smaller disk"
-        render(towers)
-        return false
-      end
-
-    else
-      puts "You might have got your tower numbers or the format wrong.\n Enter where you'd like to move from and to in the format '1,3'."
-      return false
+    unless towers[to].empty?
+      return false if correct_order?(towers[from], towers[to])
     end
 
     # validate move
-    return true
+    true
 
+  end
+
+  def towers_exist?(from_index, to_index)
+    unless (0...@discs).include?(to_index) && (0...@discs).include?(from_index)
+      puts "Tower not found. Please move disc between our available towers: #{(1..@discs).to_a}"
+      return false
+    end
+    true
+  end
+
+  def correct_order?(from_tower, to_tower)
+    puts "No disc may be placed on top of a smaller disc" if from_tower.min > to_tower.min
+    from_tower.min > to_tower.min
+  end
+
+  def right_format?(move)
+    puts "You might have got your tower numbers or the format wrong.\n Enter where you'd like to move from and to in the format '1,3'." unless move.length == 3
+    move.length == 3
+  end
+
+  def tower_empty?(tower)
+    puts "We couldn't find any discs to transfer. Try transferring discs from another tower" if tower.empty?
+    tower.empty?
   end
 
   def welcome_message
